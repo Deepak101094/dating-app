@@ -3,9 +3,13 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
-
+const dotenv = require("dotenv");
 const app = express();
+
+dotenv.config();
+
 const port = 3000;
+
 const cors = require("cors");
 
 app.use(cors());
@@ -17,7 +21,9 @@ const jwt = require("jsonwebtoken");
 const User = require("./models/userModel");
 
 mongoose
-	.connect("mongodb+srv://deepak:deepak@cluster0.6t6frod.mongodb.net/")
+	.connect(
+		"mongodb+srv://deepak:deepak@cluster0.6t6frod.mongodb.net/dating-app"
+	)
 	.then(() => {
 		console.log("Connected to MongoDB");
 	})
@@ -62,3 +68,27 @@ app.post("/register", async (req, res) => {
 		res.status(500).json({ message: "Registration failed" });
 	}
 });
+
+const sendVerificationEmail = async (email, verificationToken) => {
+	const transpoter = nodemailer.createTransport({
+		service: "gmail",
+		auth: {
+			user: "deepakpandey101094@gmail.com",
+			pass: "unfd rkfw gadx lpue",
+		},
+	});
+
+	const mailOption = {
+		from: "matchmake.com",
+		to: email,
+		subject: "Email verification",
+		text: `please click on the following link to verify your email: http://localhost:3000/verify/${verificationToken}`,
+	};
+	//send the email
+
+	try {
+		await transpoter.sendMail(mailOption);
+	} catch (error) {
+		console.log("Error while sending the email");
+	}
+};
