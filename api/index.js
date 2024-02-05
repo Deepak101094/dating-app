@@ -92,3 +92,26 @@ const sendVerificationEmail = async (email, verificationToken) => {
 		console.log("Error while sending the email");
 	}
 };
+
+// verify the user
+
+app.get("/verify:token", async (req, res) => {
+	try {
+		const token = req.params.token;
+
+		const user = User.findOne({ verificationToken: token });
+
+		if (!user) {
+			return res.status(404).json({ message: "Invalid vefification token" });
+		}
+
+		// mark the user as verified;
+		user.verified = true;
+		user.verificationToken = undefined;
+		await User.save();
+		res.status(200).json({ message: "Email verified successfully" });
+	} catch (error) {
+		console.log("Error", error);
+		res.status(500).json({ message: "Email verification failed" });
+	}
+});
